@@ -7,8 +7,7 @@ class Grade extends BaseModel
     protected string $table = 'grades';
     protected array $allowedFields = ['subject','prelim','midterm','final','grade','remarks','status'];
 
-    public function stats(): array
-    {
+    public function stats(): array{
         $stmt = $this->pdo->query('SELECT AVG(grade) AS avg_grade, MAX(grade) AS highest, MIN(grade) AS lowest FROM grades');
         $row = $stmt->fetch();
         return [
@@ -16,5 +15,11 @@ class Grade extends BaseModel
             'highest' => isset($row['highest']) ? (int)$row['highest'] : 0,
             'lowest' => isset($row['lowest']) ? (int)$row['lowest'] : 0,
         ];
+    }
+
+    public function existsBySubject(string $subject): bool {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM grades WHERE subject = ?');
+        $stmt->execute([$subject]);
+        return (int) $stmt->fetchColumn() > 0;
     }
 }

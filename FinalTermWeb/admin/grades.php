@@ -2,9 +2,13 @@
 require 'auth.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/classes/Grade.php';
+require_once __DIR__ . '/classes/Subject.php'; //Add include para sa subject name dropdown
 
-$gradeModel = new Grade();
+$gradeModel   = new Grade();
+$subjectModel = new Subject();
 $success_message = '';
+
+$enrolledSubjects = $subjectModel->getAll(1000, 0);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
@@ -17,6 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $new_final   = (int) $_POST['final'];
             $new_grade   = round(($new_prelim + $new_midterm + $new_final) / 3);
             $new_remarks = $new_grade >= 75 ? 'Passed' : 'Failed';
+
+            // Check for duplicatesss! HAHAHAHA strikta sori
+            if ($gradeModel->existsBySubject($new_subject)) {
+                $_SESSION['flash_error'] = '"' . $new_subject . '" already has a grade record.';
+                header('Location: grades.php');
+                exit;
+            }
 
             $gradeModel->add([
                 'subject' => $new_subject,
@@ -64,22 +75,40 @@ if (isset($_SESSION['flash'])) {
     unset($_SESSION['flash']);
 }
 
+$error_message = '';
+if (isset($_SESSION['flash_error'])) {
+    $error_message = $_SESSION['flash_error'];
+    unset($_SESSION['flash_error']);
+}
+
 // Pagination
 $perPage = 5;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $perPage;
 
 $grades = $gradeModel->getAll($perPage, $offset);
-$total_grades = $gradeModel->countAll();
+$allGrades = $gradeModel->getAll(1000, 0); //fetch sa tanan para ma detect kung taken na sya eme ang subject 
+$takenSubjects = array_column($allGrades, 'subject');
+
+// based sa subjects table, naka by id ang order
+$subjectOrder = [];
+foreach ($enrolledSubjects as $idx => $s) {
+    $subjectOrder[$s['name']] = $idx;
+}
+
+// mirror the order of subjects 
+usort($grades, function($a, $b) use ($subjectOrder) {
+    $posA = $subjectOrder[$a['subject']] ?? PHP_INT_MAX;
+    $posB = $subjectOrder[$b['subject']] ?? PHP_INT_MAX;
+    return $posA - $posB;
+});
+
 $s = $gradeModel->stats();
 $avg_grade = isset($s['avg_grade']) ? round($s['avg_grade'], 1) : 0;
 $highest = isset($s['highest']) ? (int)$s['highest'] : 0;
 $lowest = isset($s['lowest']) ? (int)$s['lowest'] : 0;
 
-
-// ----------------------------------------------------------
-// PAGE TITLES
-// ----------------------------------------------------------
+// PAGE TITLE
 $active_page = 'grades';
 $page_title  = 'My Grades';
 $page_icon   = '<i class="bi bi-trophy-fill"></i>';
@@ -89,6 +118,10 @@ include 'header.php';
 
 <?php if (!empty($success_message)): ?>
 <div class="alert-success"> <?= htmlspecialchars($success_message) ?></div>
+<?php endif; ?>
+
+<?php if (!empty($error_message)): ?>
+    <div class="alert-error"><?= htmlspecialchars($error_message) ?></div>
 <?php endif; ?>
 
 <div class="stats-row">
@@ -213,8 +246,22 @@ include 'header.php';
                 <input type="hidden" name="action" value="add">
                 <div class="form-grid">
                     <div class="form-group" style="grid-column: span 2;">
-                        <label for="subject">Subject Name</label>
-                        <input type="text" id="subject" name="subject" placeholder="e.g. Statistics and Probability" required>
+                        <label for="subject">Subject</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">— Select an enrolled subject —</option>
+                            <?php foreach ($enrolledSubjects as $s): ?>
+                                <?php $taken = in_array($s['name'], $takenSubjects); ?>
+                                <option value="<?= htmlspecialchars($s['name']) ?>" <?= $taken ? 'disabled' : '' ?>>
+                                    <?= htmlspecialchars($s['code']) ?> – <?= htmlspecialchars($s['name']) ?>
+                                    <?= $taken ? '(already graded)' : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if (empty($enrolledSubjects)): ?>
+                            <small style="color:var(--text-muted); margin-top:4px; display:block;">
+                                <i class="bi bi-info-circle"></i> Go to <a href="subjects.php">Subjects</a> to enroll subjects first.
+                            </small>
+                        <?php endif; ?>
                     </div>
                     <div class="form-group">
                         <label for="prelim">Prelim Score</label>
@@ -249,8 +296,15 @@ include 'header.php';
                 <input type="hidden" name="edit_id" id="edit_id">
                 <div class="form-grid">
                     <div class="form-group" style="grid-column: span 2;">
-                        <label for="edit_subject">Subject Name</label>
-                        <input type="text" id="edit_subject" name="subject" placeholder="e.g. Statistics and Probability" required>
+                        <label for="edit_subject">Subject</label>
+                        <select id="edit_subject" name="subject" required>
+                            <option value="">— Select an enrolled subject —</option>
+                            <?php foreach ($enrolledSubjects as $s): ?>
+                                <option value="<?= htmlspecialchars($s['name']) ?>">
+                                    <?= htmlspecialchars($s['code']) ?> – <?= htmlspecialchars($s['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="edit_prelim">Prelim Score</label>
