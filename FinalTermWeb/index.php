@@ -1,7 +1,7 @@
 <?php
 // ============================================================
 //  index.php  –  Login Page
-
+//
 //  Concepts:
 //   - $credentials  : global array holding valid username/password
 //   - $_POST        : reading submitted form values
@@ -9,43 +9,45 @@
 //   - header()      : redirecting to the dashboard after login
 // ============================================================
 session_start();
-// If already logged in, go straight to the dashboard
+
 if (isset($_SESSION['user'])) {
     header('Location: admin/index.php');
-    exit();
+    exit;
 }
-
-
-// ----------------------------------------------------------
-// CREDENTIALS  (simple variables — no database yet)
-// ----------------------------------------------------------
-$username = "admin";
-$password = "admin123";
-$name     = "GROUP 1 ";
-$user_id  = "CIT 11333Z";
  
-// ----------------------------------------------------------
-// HANDLE LOGIN FORM SUBMISSION
-// ----------------------------------------------------------
+// Load DB config + all classes
+require_once 'config.php';
+ 
+// Instantiate the User model, passing the DB connection
+$userModel = new User();
+ 
 $error = '';
  
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input_username = trim($_POST['username'] ?? '');
-    $input_password = trim($_POST['password'] ?? '');
-    
-    if ($input_username === $username && $input_password === $password) {
+    $input_username = trim($_POST['username']);
+    $input_password = trim($_POST['password']);
+ 
+    // Use the User model to find the matching record
+    $user = $userModel->findByUsername($input_username);
+ 
+    // Check if user exists and password matches
+    if ($user && $user['password'] === $input_password) {
+ 
+        // Store essential user info in session
         $_SESSION['user'] = [
-            'username' => $input_username,
-            'name'     => $name,
-            'id'       => $user_id,
+            'id'       => $user['id'],
+            'name'     => $user['name'],
+            'username' => $user['username'],
+            'student_no' => $user['student_no'],
         ];
+ 
         header('Location: admin/index.php');
-        exit();
+        exit;
+ 
     } else {
-        $error = 'Invalid username or password';
+        $error = "Invalid username or password. Please try again.";
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,8 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-card-body">
 
             <!-- Error message -->
-            <?php if (!empty($error)): ?>
-                <div class="alert-error"><?php echo htmlspecialchars($error); ?></div>
+            <?php if ($error): ?>
+                <div class="alert-error"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
             <!--
@@ -88,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username"
                            placeholder="Enter your username"
-                           value="<?php echo htmlspecialchars($_POST['username'] ?? '') ?>"
+                           value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
                            required autofocus>
                 </div>
                 <div class="form-group">
@@ -99,20 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <button type="submit" class="btn-login">Sign In</button>
             </form>
-
-            <!-- Test credentials hint -->
-            <div class="credentials-hint">
-                <div class="credentials-hint-title"><i class="bi bi-shield-lock-fill"></i> Test Credentials</div>
-                <div class="credential-row">
-                    <span class="cred-label">Username</span>
-                    <span class="cred-user">admin</span>
-                </div>
-                <div class="credential-row">
-                    <span class="cred-label">Password</span>
-                    <span class="cred-pass">admin123</span>
-                </div>
-            </div>
-
         </div>
     </div>
     <div class="login-footer">
