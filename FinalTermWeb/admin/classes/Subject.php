@@ -7,8 +7,7 @@ class Subject extends BaseModel
     protected string $table = 'subjects';
     protected array $allowedFields = ['code','name','teacher','units','schedule','status'];
 
-    public function stats(): array
-    {
+    public function stats(): array {
         $stmt = $this->pdo->query('SELECT COUNT(*) AS total, COALESCE(SUM(units),0) AS total_units, SUM(status = "Active") AS active_count FROM subjects');
         $row = $stmt->fetch();
         return [
@@ -18,9 +17,15 @@ class Subject extends BaseModel
         ];
     }
 
-    public function delete(int $id): bool
-    {
+    public function delete(int $id): bool{
         $stmt = $this->pdo->prepare('DELETE FROM subjects WHERE id = ?');
         return $stmt->execute([$id]);
+    }
+
+    public function getById(int $id): ?array {
+        $stmt = $this->pdo->prepare('SELECT * FROM subjects WHERE id = ?');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
     }
 }

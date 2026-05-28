@@ -22,4 +22,9 @@ class Grade extends BaseModel
         $stmt->execute([$subject]);
         return (int) $stmt->fetchColumn() > 0;
     }
+
+    public function deleteBySubject(string $subject): void {
+        $stmt = $this->pdo->prepare('DELETE FROM grades WHERE subject = ?');
+        $stmt->execute([$subject]);
+    }
 }

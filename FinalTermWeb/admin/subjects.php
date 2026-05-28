@@ -2,7 +2,9 @@
 require 'auth.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/classes/Subject.php';
+require_once __DIR__ . '/classes/Grade.php'; //hehe include para ma delete ang subject and its grade record
 
+$gradeModel = new Grade();
 $subjectModel = new Subject();
 $success_message = '';
 
@@ -34,8 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash'] = '"' . $data['name'] . '" updated successfully.';
         } elseif ($action === 'delete') {
             $delete_id = (int) $_POST['delete_id'];
+
+            //subject name before deleting 
+            $subjectToDelete = $subjectModel->getById($delete_id);
+            if ($subjectToDelete) {
+                $gradeModel->deleteBySubject($subjectToDelete['name']);
+            }
+
             $subjectModel->delete($delete_id);
-            $_SESSION['flash'] = 'Subject deleted successfully.';
+            $_SESSION['flash'] = 'Subject and its grade record deleted successfully.';
         }
 
         header('Location: subjects.php');

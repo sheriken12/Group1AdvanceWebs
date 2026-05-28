@@ -89,6 +89,7 @@ $offset = ($page - 1) * $perPage;
 $grades = $gradeModel->getAll($perPage, $offset);
 $allGrades = $gradeModel->getAll(1000, 0); //fetch sa tanan para ma detect kung taken na sya eme ang subject 
 $takenSubjects = array_column($allGrades, 'subject');
+$total_grades = $gradeModel->countAll();
 
 // based sa subjects table, naka by id ang order
 $subjectOrder = [];
