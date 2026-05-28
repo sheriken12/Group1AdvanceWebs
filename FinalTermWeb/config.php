@@ -12,9 +12,9 @@
 // ----------------------------------------------------------
 $config = [
     'host'     => 'localhost',
-    'dbname'   => 'students_db',
+    'dbname'   => 'schema',
     'username' => 'root',
-    'password' => 'root',          // XAMPP default is empty
+    'password' => '',          // XAMPP default is empty
 ];
 
 // ----------------------------------------------------------
@@ -30,3 +30,4 @@ foreach (glob(__DIR__ . '/classes/*.php') as $file) {
 // ----------------------------------------------------------
 $database = new Database($config);
 $conn     = $database->getConnection();
+$pdo      = $conn;

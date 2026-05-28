@@ -1,5 +1,3 @@
-
-
 -- Users table (login + profile)
 CREATE TABLE IF NOT EXISTS users (
     id         INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,6 +32,7 @@ CREATE TABLE IF NOT EXISTS subjects (
     teacher  VARCHAR(100),
     units    INT,
     schedule VARCHAR(50),
+    status   VARCHAR(20) DEFAULT 'Active',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -46,6 +45,8 @@ CREATE TABLE IF NOT EXISTS grades (
     midterm INT,
     final   INT,
     grade   INT,
+    remarks VARCHAR(10)  DEFAULT 'Passed',
+    status  VARCHAR(20)  DEFAULT 'Active',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -53,7 +54,6 @@ CREATE TABLE IF NOT EXISTS grades (
 --  Sample Data
 -- ============================================================
 
--- Password is: admin123  (plain text for now — no hashing yet)
 INSERT INTO users (student_no, name, username, password, birthdate, age, gender, address, email, phone, guardian, guardian_rel, guardian_contact, grade, section, track, strand, gpa, status, enrolled_at)
 VALUES (
     'STU-2024-0001', 'Maria Santos', 'admin', 'admin123',
@@ -65,7 +65,6 @@ VALUES (
     1.25, 'Active', '2024-06-10'
 );
 
--- Subjects for user_id = 1
 INSERT INTO subjects (user_id, code, name, teacher, units, schedule) VALUES
 (1, 'MATH101', 'General Mathematics',    'Mr. Batumbakal',    4, 'MWF 7:30-8:30'),
 (1, 'ENG101',  'Oral Communication',     'Ms. Flores',        2, 'TTH 9:00-10:00'),
@@ -74,18 +73,10 @@ INSERT INTO subjects (user_id, code, name, teacher, units, schedule) VALUES
 (1, 'PE101',   'Physical Education',     'Coach Delos Reyes', 2, 'WF 2:00-3:00'),
 (1, 'HIST101', 'Philippine History',     'Ms. Bautista',      3, 'MWF 1:00-2:00');
 
--- Grades for user_id = 1
-INSERT INTO grades (user_id, subject, prelim, midterm, final, grade) VALUES
-(1, 'General Mathematics',    88, 91, 90, 90),
-(1, 'Oral Communication',     92, 89, 94, 92),
-(1, 'Earth and Life Science', 85, 87, 88, 87),
-(1, 'Komunikasyon',           90, 92, 91, 91),
-(1, 'Physical Education',     95, 97, 96, 96),
-(1, 'Philippine History',     82, 85, 84, 84);
-
-
-
-
--- AFTER FURTHER READINGS AHAHAHAHA--
-ALTER TABLE grades ADD COLUMN remarks VARCHAR(10) DEFAULT 'Passed';
-ALTER TABLE grades ADD COLUMN status VARCHAR(10) DEFAULT 'Active';
+INSERT INTO grades (user_id, subject, prelim, midterm, final, grade, remarks, status) VALUES
+(1, 'General Mathematics',    88, 91, 90, 90, 'Passed', 'Active'),
+(1, 'Oral Communication',     92, 89, 94, 92, 'Passed', 'Active'),
+(1, 'Earth and Life Science', 85, 87, 88, 87, 'Passed', 'Active'),
+(1, 'Komunikasyon',           90, 92, 91, 91, 'Passed', 'Active'),
+(1, 'Physical Education',     95, 97, 96, 96, 'Passed', 'Active'),
+(1, 'Philippine History',     82, 85, 84, 84, 'Passed', 'Active');

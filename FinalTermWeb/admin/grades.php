@@ -1,8 +1,8 @@
 <?php
 require 'auth.php';
 require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/classes/Grade.php';
-require_once __DIR__ . '/classes/Subject.php'; //Add include para sa subject name dropdown
+require_once __DIR__ . '/../classes/Subject.php';
+require_once __DIR__ . '/../classes/Grade.php'; //Add include para sa subject name dropdown
 
 $gradeModel   = new Grade();
 $subjectModel = new Subject();

@@ -7,7 +7,7 @@
 // ============================================================
 
 class User extends BaseModel {
-    protected $table = "users";
+    protected string $table = "users";
 
     // Find a user by username (used for login)
     public function findByUsername($username) {
@@ -17,13 +17,12 @@ class User extends BaseModel {
     }
 
     // Update profile fields for a given user ID
-    public function update($id, $data) {
-        // already handled by BaseModel's update()
+    public function update(int $id, array $data): bool {
         return parent::update($id, $data);
     }
 
     // Create a new user record
-    public function create($data) {
-        return $this->add($data);
+    public function create(array $data): int {
+        return parent::add($data);
     }
 }

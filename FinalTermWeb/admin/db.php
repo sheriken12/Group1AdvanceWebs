@@ -1,6 +1,6 @@
 <?php
 define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'finalterm');
+define('DB_NAME', 'schema');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
@@ -71,4 +71,6 @@ function ensureSchemaExists(PDO $pdo)
     } catch (Exception $e) {
         die('Failed to ensure schema: ' . $e->getMessage() . '. You can manually import admin/schema.sql: mysql -u ' . DB_USER . ' -p < admin/schema.sql');
     }
+
+    $pdo = getPDO();
 }

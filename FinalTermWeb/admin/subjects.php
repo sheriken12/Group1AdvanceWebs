@@ -1,8 +1,8 @@
 <?php
 require 'auth.php';
 require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/classes/Subject.php';
-require_once __DIR__ . '/classes/Grade.php'; //hehe include para ma delete ang subject and its grade record
+require_once __DIR__ . '/../classes/Subject.php';
+require_once __DIR__ . '/../classes/Grade.php'; //hehe include para ma delete ang subject and its grade record
 
 $gradeModel = new Grade();
 $subjectModel = new Subject();
